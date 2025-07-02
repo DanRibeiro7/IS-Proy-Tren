@@ -30,5 +30,15 @@ class Boleto extends Model
     {
         return $this->belongsTo(Ruta::class, 'RutID');
 }
+public function estacion_origen()
+{
+    return $this->belongsTo(Estacion::class, 'estacion_origen_id');
+}
+
+public function estacion_destino()
+{
+    return $this->belongsTo(Estacion::class, 'estacion_destino_id');
+}
+
 }
 

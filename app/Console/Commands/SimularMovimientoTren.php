@@ -5,8 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Tren;
 use App\Models\TrenPosicion;
-use App\Models\RutaEstacion;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SimularMovimientoTren extends Command
 {
@@ -26,15 +26,13 @@ class SimularMovimientoTren extends Command
         $ahora = Carbon::now();
 
         if ($pos->Estado === 'en_movimiento') {
-            // Si aún no ha llegado a la siguiente estación
             if ($ahora->lt(Carbon::parse($pos->HoraLlegadaEstimada))) {
-                $this->info("Tren en movimiento, llegará a la estación {$pos->EstacionSiguienteID} a las {$pos->HoraLlegadaEstimada}");
-                return 0; // Esperar a que llegue
+                $this->info("Tren en movimiento hacia estación {$pos->EstacionSiguienteID}, llegará a las {$pos->HoraLlegadaEstimada}");
+                return 0;
             }
 
-            // Llegó a la estación siguiente
             $pos->EstacionActualID = $pos->EstacionSiguienteID;
-            $pos->HoraSalidaEstimada = $ahora->addSeconds(3); // Se detiene 3 segundos
+            $pos->HoraSalidaEstimada = $ahora->copy()->addSeconds(3);
             $pos->Estado = 'detenido';
             $pos->save();
 
@@ -43,20 +41,42 @@ class SimularMovimientoTren extends Command
         elseif ($pos->Estado === 'detenido') {
             if ($ahora->lt(Carbon::parse($pos->HoraSalidaEstimada))) {
                 $this->info("Tren detenido en estación {$pos->EstacionActualID} hasta {$pos->HoraSalidaEstimada}");
-                return 0; // Sigue detenido
+                return 0;
             }
 
-            // Busca la siguiente estación en la ruta
-            // Aquí debes buscar la siguiente estación basada en la ruta y el orden actual
             $siguiente = $this->obtenerSiguienteEstacion($pos);
 
             if (!$siguiente) {
-                $this->info("Tren terminó recorrido en estación {$pos->EstacionActualID}");
-                return 0; // Fin de la ruta
+                if ($pos->RutaID == 1) {
+                    $this->info("Tren terminó ruta de ida. Iniciando ruta de regreso...");
+
+                    $pos->RutaID = 2;
+                    $nuevaEstacion = $this->obtenerPrimeraEstacion(2);
+
+                    if (!$nuevaEstacion) {
+                        $this->error("No se encontró estación para ruta de regreso.");
+                        return 0;
+                    }
+
+                    $pos->EstacionSiguienteID = $nuevaEstacion;
+                    $pos->HoraLlegadaEstimada = $ahora->copy()->addSeconds(10);
+                    $pos->Estado = 'en_movimiento';
+                    $pos->save();
+
+                    $this->info("Tren arrancó hacia estación {$pos->EstacionSiguienteID} (ruta de regreso), llegará a las {$pos->HoraLlegadaEstimada}");
+                    return 0;
+                } elseif ($pos->RutaID == 2) {
+                    $this->info("Tren completó el recorrido de ida y vuelta. Fin del trayecto en estación {$pos->EstacionActualID}");
+                    return 0;
+                }
+
+                $this->error("No se encontró estación siguiente válida.");
+                return 0;
             }
 
+            // Continuar ruta normal
             $pos->EstacionSiguienteID = $siguiente->EstacionID;
-            $pos->HoraLlegadaEstimada = $ahora->addSeconds(10); // 10 segundos para llegar
+            $pos->HoraLlegadaEstimada = $ahora->copy()->addSeconds(10);
             $pos->Estado = 'en_movimiento';
             $pos->save();
 
@@ -70,26 +90,30 @@ class SimularMovimientoTren extends Command
 
     private function obtenerSiguienteEstacion($pos)
     {
-        // Aquí debes implementar la lógica para determinar la siguiente estación
-        // Puede ser con base en la tabla ruta_estacion, orden, etc.
-        // Ejemplo simple: buscar la estación siguiente con orden +1 en la misma ruta
+        $rutaId = $pos->RutaID ?? 1;
 
-        $rutaId = $pos->RutaID ?? 1; // Asume ruta 1 si no hay ruta definida
-
-        $actualOrden = \DB::table('ruta_estacion')
+        $actualOrden = DB::table('ruta_estacion')
             ->where('RutaID', $rutaId)
             ->where('EstacionID', $pos->EstacionActualID)
             ->value('Orden');
 
         if (!$actualOrden) {
-            return null; // No encontró orden actual
+            return null;
         }
 
-        $siguiente = \DB::table('ruta_estacion')
+        return DB::table('ruta_estacion')
             ->where('RutaID', $rutaId)
             ->where('Orden', $actualOrden + 1)
             ->first();
+    }
 
-        return $siguiente;
+    private function obtenerPrimeraEstacion($rutaId)
+    {
+        $primera = DB::table('ruta_estacion')
+            ->where('RutaID', $rutaId)
+            ->orderBy('Orden')
+            ->first();
+
+        return $primera ? $primera->EstacionID : null;
     }
 }

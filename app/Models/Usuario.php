@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class Usuario extends Model
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+class Usuario extends Authenticatable
 {
     protected $table = 'usuario';
     protected $primaryKey = 'UsuID';
@@ -18,4 +19,18 @@ class Usuario extends Model
 
     ];
     public $timestamps = false;
+
+    protected $hidden = [
+        'UsuPassword',
+    ];
+
+    public function getAuthPassword()
+    {
+        return $this->UsuPassword;
+    }
+
+    public function getAuthIdentifierName()
+    {
+        return 'UsuCorreo';
+    }
 }

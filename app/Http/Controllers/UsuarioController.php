@@ -26,7 +26,7 @@ class UsuarioController extends Controller
             'UsuCorreo' => 'required|email|unique:usuario,UsuCorreo',
             'UsuNumero' => 'required',
             'UsuPassword' => 'required',
-            'UsuTipoUsuario' => 'required',
+            'UsuTipoUsuario' ,
         ]);
 
         Usuario::create($request->all());

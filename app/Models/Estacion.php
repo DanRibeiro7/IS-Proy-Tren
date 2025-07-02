@@ -13,4 +13,14 @@ class Estacion extends Model
         'EstUbicacion',
     ];
     public $timestamps = false;
+    public function zonaTuristica()
+{
+    return $this->hasOne(\App\Models\DestinoTuristico::class, 'EstID', 'EstID');
 }
+
+public function clima()
+{
+    return $this->hasOne(\App\Models\Clima::class, 'EstID', 'EstID');
+}
+}
+
