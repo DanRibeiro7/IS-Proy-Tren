@@ -8,4 +8,5 @@
 
     <h1>Bienvenido Administrador</h1>
     <a href="{{ route('admin.linea') }}">🚆 Ver Línea del Tren</a>
+   
 @endsection

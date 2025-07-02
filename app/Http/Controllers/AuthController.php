@@ -14,7 +14,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request)
+   public function login(Request $request)
     {
         $credentials = $request->only('UsuCorreo', 'UsuPassword');
 
@@ -30,6 +30,9 @@ class AuthController extends Controller
         'error' => 'Correo o contraseña incorrectos',
     ]);
     }
+
+
+
 
     public function logout()
     {

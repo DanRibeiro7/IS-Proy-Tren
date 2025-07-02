@@ -14,11 +14,18 @@
         </tr>
         <tr>
             <th>Cliente</th>
-            <td>{{ $boleto->usuario->UsuNombres }} {{ $boleto->usuario->UsuApellidos }}</td>
+            <td>
+                {{ $boleto->usuario->UsuNombres ?? 'N/A' }} {{ $boleto->usuario->UsuApellidos ?? '' }}
+            </td>
+        </tr>
+       
+        <tr>
+            <th>Estación Origen</th>
+            <td>{{ $boleto->estacion_origen->EstNombre ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <th>Ruta</th>
-            <td>{{ $boleto->ruta->origen->EstNombre }} → {{ $boleto->ruta->destino->EstNombre }}</td>
+            <th>Estación Destino</th>
+            <td>{{ $boleto->estacion_destino->EstNombre ?? 'N/A' }}</td>
         </tr>
         <tr>
             <th>Fecha de viaje</th>
@@ -29,19 +36,44 @@
             <td>{{ $boleto->BolHoraSalida }}</td>
         </tr>
         <tr>
+            <th>Hora estimada de llegada</th>
+            <td>{{ $boleto->BolHoraLlegada }}</td>
+        </tr>
+        <tr>
+            <th>Distancia</th>
+            <td>{{ $boleto->BolDistanciaKM }} km</td>
+        </tr>
+        <tr>
             <th>Precio</th>
             <td>S/ {{ number_format($boleto->BolPrecio, 2) }}</td>
         </tr>
         <tr>
-            <th>Estado</th>
-            <td>{{ ucfirst($boleto->BolEstado) }}</td>
+            <th>Método de pago</th>
+            <td>{{ ucfirst($boleto->BolMetodoPago) }}</td>
         </tr>
+       <tr>
+    <th>Estado</th>
+    <td>
+        @if ($boleto->BolEstado === 'cancelado')
+            <span style="color: red; font-weight: bold;">Anulado</span>
+        @else
+            {{ ucfirst($boleto->BolEstado) }}
+        @endif
+    </td>
+</tr>
+
     </table>
 
     <br>
+    @if ($boleto->BolEstado === 'pendiente')
+    <form action="{{ route('cliente.anular_boleto', $boleto->BolID) }}" method="POST" onsubmit="return confirm('¿Estás seguro de anular este boleto?');">
+        @csrf
+        @method('PUT')
+        <button type="submit" style="color:red;">❌ Anular Boleto</button>
+    </form>
+@endif
 
-    <a href="{{ route('cliente.linea_tren') }}">⬅️ Volver a la Línea del Tren</a>
-    <br>
-    <a href="{{ route('cliente.comprar_boleto') }}">🎟️ Comprar otro boleto</a>
+
+    <a href="{{ route('cliente.linea_tren') }}">⬅️ Volver a la Línea del Tren</a><br>
+   
 @endsection
-

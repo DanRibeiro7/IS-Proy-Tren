@@ -25,11 +25,14 @@
         @auth
             @if(auth()->user()->UsuTipoUsuario === 'cliente')
                 <a href="{{ route('cliente.dashboard') }}">Inicio</a>
-                <a href="{{ route('cliente.linea') }}">Ver Estaciones</a>
+                <a href="{{ route('cliente.linea_tren') }}">Ver Estaciones</a>
+                <a href="{{ route('cliente.historial') }}">📋 Ver historial de boletos</a>
+
                
                 
             @elseif(auth()->user()->UsuTipoUsuario === 'admin')
                 <a href="{{ route('admin.dashboard') }}">Panel Admin</a>
+                <a href="{{ route('admin.usuarios.index') }}">👥 Gestionar Usuarios</a>
                 <a href="{{ route('admin.linea') }}">Ver Línea de Tren</a>
                 <a href="{{ route('estacions.index') }}">Estaciones</a>
                 <a href="{{ route('destinos.index') }}">Destinos Turísticos</a>
