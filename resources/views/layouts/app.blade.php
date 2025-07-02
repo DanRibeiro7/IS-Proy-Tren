@@ -37,6 +37,7 @@
                 <a href="{{ route('estacions.index') }}">Estaciones</a>
                 <a href="{{ route('destinos.index') }}">Destinos Turísticos</a>
                 <a href="{{ route('climas.index') }}">Climas</a>
+                <a href="{{ route('admin.boletos.historial') }}">Reportes</a> 
             @endif
 
             <a href="{{ route('logout') }}"

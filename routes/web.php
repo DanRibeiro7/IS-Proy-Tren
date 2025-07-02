@@ -93,6 +93,6 @@ Route::middleware(['auth', 'esAdmin'])->prefix('admin')->group(function () {
     Route::get('/{id}/editar', [AdminUsuarioController::class, 'edit'])->name('admin.usuarios.edit');
     Route::put('/{id}', [AdminUsuarioController::class, 'update'])->name('admin.usuarios.update');
     Route::delete('/{id}', [AdminUsuarioController::class, 'destroy'])->name('admin.usuarios.destroy');
-
+     Route::get('/admin/boletos/historial', [\App\Http\Controllers\AdminBoletoController::class, 'historial'])->name('admin.boletos.historial');
 
 });
