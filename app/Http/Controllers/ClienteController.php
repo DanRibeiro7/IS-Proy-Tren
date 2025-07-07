@@ -39,14 +39,18 @@ public function dashboard()
         ->get();
 
     // Obtener destinos turísticos con su estación y clima precargados
-    $destinos = DestinoTuristico::with(['tipoZona', 'estacion.clima'])
-        ->where('TipZonaID', $preferencias->TipZonaID)
-        ->get()
-        ->filter(function ($destino) use ($preferencias) {
-            // Verificamos si la estación del destino tiene algún clima del tipo preferido
-            $climasEstacion = $destino->estacion->clima->where('TipClimaID', $preferencias->TipClimaID);
-            return $climasEstacion->count() > 0;
-        });
+  $destinos = DestinoTuristico::with(['tipoZona', 'estacion.clima'])
+    ->where('TipZonaID', $preferencias->TipZonaID)
+    ->get()
+    ->filter(function ($destino) use ($preferencias) {
+        // Verificamos que exista la estación y que tenga climas
+        if (!$destino->estacion || !$destino->estacion->clima) {
+            return false;
+        }
+
+        $climasEstacion = $destino->estacion->clima->where('TipClimaID', $preferencias->TipClimaID);
+        return $climasEstacion->count() > 0;
+    });
 
     return view('cliente.dashboard', compact('destinos', 'climas', 'preferencias'));
 }

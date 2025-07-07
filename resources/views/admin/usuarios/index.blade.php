@@ -1,20 +1,101 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        body {
+            background: linear-gradient(to right, #0e1a4f, #a0ffd0);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        h2, h3 {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            color: #fff;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        td {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        a, button {
+            color: #00f3ff;
+            text-decoration: none;
+            font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover, a:hover {
+            text-decoration: underline;
+        }
+
+        .crear-link {
+            display: block;
+            width: fit-content;
+            margin: 10px auto;
+            background: #00c2ff;
+            padding: 8px 14px;
+            border-radius: 8px;
+        }
+
+        .volver {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: #fff;
+        }
+
+        .volver:hover {
+            text-decoration: underline;
+        }
+
+        .success {
+            color: #00ff80;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+
     <h2>👥 Gestión de Usuarios</h2>
 
     @if(session('success'))
-        <div style="color: green;">{{ session('success') }}</div>
+        <div class="success">{{ session('success') }}</div>
     @endif
 
     {{-- Administradores --}}
     <h3>🛡️ Administradores</h3>
-    <a href="{{ route('admin.usuarios.create') }}">➕ Crear nuevo administrador</a>
+    <a href="{{ route('admin.usuarios.create') }}" class="crear-link">➕ Crear nuevo administrador</a>
 
     @if($admins->isEmpty())
-        <p>No hay administradores registrados.</p>
+        <p style="text-align:center;">No hay administradores registrados.</p>
     @else
-        <table border="1" cellpadding="8" cellspacing="0">
+        <table>
             <tr>
                 <th>ID</th>
                 <th>Nombre completo</th>
@@ -31,7 +112,7 @@
                         <form action="{{ route('admin.usuarios.destroy', $admin->UsuID) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este administrador?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" style="color:red;">🗑️ Eliminar</button>
+                            <button type="submit">🗑️ Eliminar</button>
                         </form>
                     </td>
                 </tr>
@@ -41,11 +122,10 @@
 
     {{-- Clientes --}}
     <h3>👤 Clientes</h3>
-
     @if($clientes->isEmpty())
-        <p>No hay clientes registrados.</p>
+        <p style="text-align:center;">No hay clientes registrados.</p>
     @else
-        <table border="1" cellpadding="8" cellspacing="0">
+        <table>
             <tr>
                 <th>ID</th>
                 <th>Nombre completo</th>
@@ -61,6 +141,5 @@
         </table>
     @endif
 
-    <br>
-    <a href="{{ route('admin.dashboard') }}">⬅️ Volver al panel</a>
+    <a class="volver" href="{{ route('admin.dashboard') }}">⬅️ Volver al panel</a>
 @endsection

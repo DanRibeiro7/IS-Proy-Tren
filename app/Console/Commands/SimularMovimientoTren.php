@@ -65,8 +65,46 @@ class SimularMovimientoTren extends Command
 
                     $this->info("Tren arrancó hacia estación {$pos->EstacionSiguienteID} (ruta de regreso), llegará a las {$pos->HoraLlegadaEstimada}");
                     return 0;
-                } elseif ($pos->RutaID == 2) {
+                } 
+                elseif ($pos->RutaID == 2) {
                     $this->info("Tren completó el recorrido de ida y vuelta. Fin del trayecto en estación {$pos->EstacionActualID}");
+
+                    if ($pos->EstacionActualID == 1) {
+                        $tren->bucle_actual += 1;
+                        $tren->save();
+
+                        $this->info("Bucle número {$tren->bucle_actual} completado.");
+
+                        if ($tren->bucle_actual >= 3) {
+                            $this->info("🚦 El tren ha completado los 3 bucles. Finalizando operación.");
+                            $tren->TrenEstado = 'fuera_servicio';
+                            $tren->save();
+
+                            $pos->Estado = 'detenido';
+                            $pos->save();
+
+                            return 0;
+                        }
+
+                        // Reiniciar a la ruta de ida
+                        $this->info("🔄 Reiniciando a la ruta de ida...");
+                        $pos->RutaID = 1;
+                        $nuevaEstacion = $this->obtenerPrimeraEstacion(1);
+
+                        if (!$nuevaEstacion) {
+                            $this->error("No se encontró estación para ruta de ida.");
+                            return 0;
+                        }
+
+                        $pos->EstacionSiguienteID = $nuevaEstacion;
+                        $pos->HoraLlegadaEstimada = Carbon::now()->copy()->addSeconds(10);
+                        $pos->Estado = 'en_movimiento';
+                        $pos->save();
+
+                        $this->info("Tren arrancó hacia estación {$pos->EstacionSiguienteID} (ruta ida), llegará a las {$pos->HoraLlegadaEstimada}");
+                        return 0;
+                    }
+
                     return 0;
                 }
 
@@ -81,7 +119,8 @@ class SimularMovimientoTren extends Command
             $pos->save();
 
             $this->info("Tren arrancó hacia estación {$pos->EstacionSiguienteID}, llegará a las {$pos->HoraLlegadaEstimada}");
-        } else {
+        } 
+        else {
             $this->error("Estado desconocido en la posición del tren.");
         }
 

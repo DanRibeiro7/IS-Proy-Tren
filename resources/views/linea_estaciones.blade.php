@@ -1,88 +1,135 @@
 @extends('layouts.app')
 
-@section('content') {{-- 🔧 Aquí empieza la sección correcta --}}
-
-@if(Auth::user()->rol === 'cliente')
-    <p>Estás navegando como <strong>Cliente</strong>.</p>
-@elseif(Auth::user()->rol === 'admin')
-    <p>Estás navegando como <strong>Administrador</strong>.</p>
-@endif
-
 @section('content')
-<div id="mensaje-alerta" style="
-    display: none;
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #f5c6cb;
-    background-color: #f8d7da;
-    color: #721c24;
-    border-radius: 5px;
-    font-weight: bold;
-">
+<style>
+    body {
+        background: linear-gradient(to right, #0e1a4f, #a0ffd0);
+        color: #fff;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 32px;
+    }
+
+    #train-line-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+    }
+
+    .train-line {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 90%;
+        height: 160px;
+        margin-top: 40px;
+    }
+
+    .station {
+        position: relative;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .station-icon {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 50%;
+        border: 4px solid #0e1a4f;
+        z-index: 10;
+    }
+
+    .station-name {
+        margin-top: 10px;
+        font-weight: bold;
+        color: white;
+    }
+
+    .zigzag {
+        position: absolute;
+        top: 25px;
+        height: 4px;
+        background: white;
+        z-index: 1;
+    }
+
+    .zigzag.down { transform: translateY(20px) rotate(10deg); }
+    .zigzag.up { transform: translateY(-20px) rotate(-10deg); }
+
+    .train {
+        position: absolute;
+        top: -70px;
+        font-size: 48px;
+        transition: transform 1.2s ease-in-out;
+        z-index: 100;
+    }
+
+    #info-panel {
+        background: white;
+        color: #333;
+        margin-top: 40px;
+        padding: 20px;
+        border-radius: 12px;
+        width: 70%;
+        display: none;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    #info-panel img {
+        width: 100%;
+        max-height: 180px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .estacion-activa { border-color: #ff9800 !important; }
+    .alerta { background: #ffc107; color: black; padding: 10px; margin: 20px auto; width: 70%; border-radius: 8px; text-align: center; }
+</style>
+
+<h1>🚆 Línea del Tren Interurbano</h1>
+
+<div class="alerta" id="mensaje-alerta" style="display: none;"></div>
+<div style="text-align: center; margin-top: 10px;">
+    <strong>🚦 Estado del tren:</strong>
+    <span id="estado-tren" style="font-weight: bold; color: #ffff66;">Cargando...</span>
 </div>
 
-@if(session('success'))
-    <div style="background: #d4edda; padding: 10px; margin: 10px 0; border: 1px solid #c3e6cb;">
-        {{ session('success') }}
+<div id="train-line-container">
+    <div class="train-line" id="train-line">
+        <div id="train" class="train">🚄</div>
+        @foreach($estaciones as $index => $estacion)
+            <div class="station" data-id="{{ $estacion->EstID }}">
+                <div class="station-icon" id="station-icon-{{ $estacion->EstID }}"></div>
+                <div class="station-name">{{ $estacion->EstNombre }}</div>
+                @if(!$loop->last)
+                    <div class="zigzag {{ $loop->iteration % 2 == 0 ? 'down' : 'up' }}" style="left: 100%; width: 60px;"></div>
+                @endif
+            </div>
+        @endforeach
     </div>
-@endif
+</div>
 
-@if(session('error'))
-    <div style="background: #f8d7da; color: #721c24; padding: 10px; margin: 10px 0; border: 1px solid #f5c6cb;">
-        {{ session('error') }}
+<div id="info-panel">
+    <h3 id="info-nombre"></h3>
+    <p><strong>Clima:</strong> <span id="info-clima"></span></p>
+    <p><strong>Zonas Turísticas:</strong></p>
+    <ul id="info-zonas"></ul>
+    <img id="info-imagen" src="" alt="Imagen zona turística">
+
+    <div id="tiempo-espera-info" style="margin-top: 10px; font-weight: bold; color: #ff6600; display:none;">
+        ⏳ <span id="texto-tiempo-espera"></span>
     </div>
-@endif
 
-<h1>Línea de Estaciones</h1>
+    <button onclick="iniciarCompra()">🎟️ Comprar Boleto</button>
 
-<div style="margin-bottom: 10px;">
-    <strong>⏱ Tiempo de viaje:</strong> <span id="timer">0</span> segundos
-</div>
-<div style="margin-bottom: 10px;">
-    <strong>🚦 Estado del tren:</strong> <span id="estado-tren">Cargando...</span>
-</div>
-
-
-<div id="train-line" style="position:relative; display:flex; align-items:center; gap:40px;">
-
-    <!-- Tren flotante -->
-    <div id="tren" style="position:absolute; top:-30px; left:0; transition: transform 1.5s ease; font-size: 24px;">🚆</div>
-
-    @foreach ($estaciones as $estacion)
-       <div id="estacion-{{ $estacion->EstID }}" class="station" data-id="{{ $estacion->EstID }}" style="cursor:pointer; text-align:center; position: relative;">
-
-            <div class="circle" style="width:40px; height:40px; border-radius:50%; background:#3490dc; margin:auto;"></div>
-            <div>{{ $estacion->EstNombre }}</div>
-        </div>
-
-        @if (!$loop->last)
-            <div class="line" style="flex-grow:1; height:4px; background:#ccc;"></div>
-        @endif
-    @endforeach
-
-</div>
-<!-- Evaluar si el tren ya pasó por esta estación -->
-
-
-
-
-
-
-<div id="info" style="margin-top:30px; border:1px solid #ccc; padding:15px; display:none;">
-    <h3>Información de Estación</h3>
-   
-
-    <div id="info-content"></div>
-    <div id="tiempo-espera-info" style="margin-top: 10px; display:none; font-weight: bold; color: #ff6600;">
-    ⏳ <span id="texto-tiempo-espera"></span>
-</div>
-
-     <button id="activar-compra" onclick="iniciarCompra()">🎟️ Comprar Boleto</button>
-    
-<div id="boleto-form" style="margin-top: 30px; display:none;">
-    <h3>Comprar Boleto</h3>
-    @dump(session()->token())
-    <form method="POST" action="{{ route('boleto.store') }}">
+    <form method="POST" action="{{ route('boleto.store') }}" id="boleto-form" style="margin-top: 20px; display:none;">
         @csrf
         <input type="hidden" name="estacion_origen_id" id="input-origen">
         <input type="hidden" name="estacion_destino_id" id="input-destino">
@@ -90,262 +137,145 @@
         <input type="hidden" name="distancia_km" id="input-distancia">
         <input type="hidden" name="ruta_id" id="input-ruta">
 
-       
+        <p>Distancia: <span id="distancia-text">0</span> km</p>
+        <p>Precio: S/ <span id="precio-text">0.00</span></p>
+        <p>Hora estimada de llegada: <span id="hora-estimada-llegada">--:--</span></p>
 
-        <div>
-            <label>Distancia estimada: <span id="distancia-text">0</span> km</label>
-        </div>
-        <div>
-            <label>Precio total: S/ <span id="precio-text">0.00</span></label>
-        </div>
-        <div>
-    <label for="metodo_pago">Método de pago:</label>
-    <select name="metodo_pago" required>
-        <option value="tarjeta">Tarjeta</option>
-        <option value="efectivo">Efectivo</option>
-        <option value="yape">Yape</option>
-    </select>
-</div>
+        <label for="metodo_pago">Método de pago:</label>
+        <select name="metodo_pago" required>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="efectivo">Efectivo</option>
+            <option value="yape">Yape</option>
+        </select>
 
-<div>
-    <label for="hora_llegada">Hora estimada de llegada:</label>
-    <span id="hora-estimada-llegada">--:--</span>
-</div>
-
-
-        <button type="submit">Comprar</button>
+        <button type="submit" style="margin-top:10px;">Comprar</button>
+        <button type="button" onclick="resetSeleccion()" style="margin-top:10px;">🔄 Reiniciar</button>
     </form>
-    <button onclick="resetSeleccion()" style="margin-top:10px;">🔄 Reiniciar Selección</button>
-
-</div>
-
-
 </div>
 
 <script>
     const estaciones = @json($estaciones);
     const destinos = @json($destinos);
     const climas = @json($climas);
-    const rutas = @json($rutas);
-
     let selectedStations = [];
-     let rutaActualGlobal = 1;
-     let modoCompraActivo = false;
+    let modoCompraActivo = false;
+    let rutaActualGlobal = 1;
 
-     function mostrarAlerta(mensaje) {
-    const alertaDiv = document.getElementById('mensaje-alerta');
-    alertaDiv.textContent = mensaje;
-    alertaDiv.style.display = 'block';
+    const train = document.getElementById('train');
+    const stationElements = document.querySelectorAll('.station');
 
-    setTimeout(() => {
-        alertaDiv.style.display = 'none';
-    }, 7000); // se oculta después de 5 segundos
-}
-
-function iniciarCompra() {
-      if (selectedStations.length < 2) {
-         mostrarAlerta("Por favor, selecciona estación de origen y destino haciendo clic en la estacion deseada.");
-    }
-    modoCompraActivo = true;
-    selectedStations = [];
-    document.getElementById('boleto-form').style.display = 'none';
-    document.querySelectorAll('.circle').forEach(c => c.style.background = '#3490dc');
-    document.querySelectorAll('.line').forEach(l => l.style.background = '#ccc');
-}
-
-     function trenRutaActual() {
-    return rutaActualGlobal || 1; // default a 1 si aún no cargó
-}
-
-    function resetSeleccion() {
- modoCompraActivo = false;
-
-    selectedStations = [];
-    document.getElementById('boleto-form').style.display = 'none';
-    document.querySelectorAll('.circle').forEach(c => c.style.background = '#3490dc');
-    document.querySelectorAll('.line').forEach(l => l.style.background = '#ccc');
-    document.getElementById('tiempo-espera-info').style.display = 'none';
-
-}
-
-  
-
-
-    function highlightRoute(est1, est2) {
-        document.querySelectorAll('.circle').forEach(c => c.style.background = '#3490dc');
-        document.querySelectorAll('.line').forEach(l => l.style.background = '#ccc');
-
-        document.querySelectorAll('.station').forEach(s => {
-            const id = parseInt(s.dataset.id);
-            if(id === est1 || id === est2) {
-                s.querySelector('.circle').style.background = '#e3342f';
-            }
-        });
-
-        const stationsArr = Array.from(document.querySelectorAll('.station'));
-        let startIndex = stationsArr.findIndex(s => parseInt(s.dataset.id) === est1);
-        let endIndex = stationsArr.findIndex(s => parseInt(s.dataset.id) === est2);
-
-        if(startIndex > endIndex){
-            [startIndex, endIndex] = [endIndex, startIndex];
-        }
-
-        for(let i = startIndex; i < endIndex; i++){
-            const lineDiv = stationsArr[i].nextElementSibling;
-            if(lineDiv && lineDiv.classList.contains('line')){
-                lineDiv.style.background = '#e3342f';
-            }
-        }
-    }
-    
- document.querySelectorAll('.station').forEach(stationDiv => {
-    stationDiv.addEventListener('click', () => {
-        const estId = parseInt(stationDiv.dataset.id);
-
-        const destinoEstacion = destinos.filter(d => d.EstID === estId);
-        const climaEstacion = climas.find(c => c.EstID === estId);
-
-        let html = `<strong>Estación:</strong> ${stationDiv.innerText.trim()}<br>`;
-        html += `<strong>Clima:</strong> ${climaEstacion ? climaEstacion.CliClima : 'No disponible'}<br>`;
-
-        if(destinoEstacion.length > 0){
-            html += `<strong>Zonas Turísticas:</strong><ul>`;
-            destinoEstacion.forEach(d => {
-                html += `<li>${d.DesTNombre}</li>`;
-            });
-            html += `</ul>`;
-        } else {
-            html += `<strong>Zonas Turísticas:</strong> No hay zonas registradas.`;
-        }
-
-        document.getElementById('info-content').innerHTML = html;
-        document.getElementById('info').style.display = 'block';
-
-       if (modoCompraActivo && selectedStations.length < 2 && !selectedStations.includes(estId)) {
-    selectedStations.push(estId);
-    stationDiv.querySelector('.circle').style.background = '#e3342f';
-
-    if (selectedStations.length === 1) {
-        // Llamar a la API para ver si el tren ya pasó por esta estación
-        fetch(`/api/tiempo-espera/${estId}`)
+    function moverTren() {
+        fetch('/api/tren-posicion')
             .then(res => res.json())
             .then(data => {
-                const esperaDiv = document.getElementById('tiempo-espera-info');
-                const textoEspera = document.getElementById('texto-tiempo-espera');
+                const estadoTexto = data.estado === 'en_movimiento'
+    ? 'En movimiento 🚆'
+    : data.estado === 'detenido'
+    ? 'Detenido ⏸️'
+    : 'Desconocido ❓';
 
-                if (data.espera === 0) {
-                    textoEspera.textContent = "🚆 El tren aún no ha pasado por esta estación.";
-                } else {
-                    textoEspera.textContent = `⌛ El tren ya pasó. Tiempo estimado de espera para el próximo recorrido: ${data.espera} horas.`;
-                }
+document.getElementById('estado-tren').textContent = estadoTexto;
 
-                esperaDiv.style.display = 'block';
-            })
-            .catch(err => {
-                console.error('Error al consultar tiempo de espera:', err);
+                const estacionActual = document.getElementById('station-icon-' + data.estacion_actual);
+                const line = document.getElementById('train-line');
+                const rect = estacionActual.getBoundingClientRect();
+                const parentRect = line.getBoundingClientRect();
+                const offsetX = rect.left - parentRect.left;
+
+                train.style.transform = `translateX(${offsetX}px)`;
+                rutaActualGlobal = data.ruta_id;
             });
     }
-}
 
+    setInterval(moverTren, 3000);
+    moverTren();
 
-        if (modoCompraActivo && selectedStations.length === 2){
-            
+    function mostrarAlerta(mensaje) {
+        const alerta = document.getElementById('mensaje-alerta');
+        alerta.textContent = mensaje;
+        alerta.style.display = 'block';
+        setTimeout(() => alerta.style.display = 'none', 5000);
+    }
 
-            highlightRoute(selectedStations[0], selectedStations[1]);
+    function iniciarCompra() {
+        modoCompraActivo = true;
+        selectedStations = [];
+        document.getElementById('boleto-form').style.display = 'none';
+        document.getElementById('tiempo-espera-info').style.display = 'none';
+        document.querySelectorAll('.station-icon').forEach(i => i.style.borderColor = '#0e1a4f');
+    }
 
-            const estacionesArr = Array.from(document.querySelectorAll('.station'));
-            let startIndex = estacionesArr.findIndex(s => parseInt(s.dataset.id) === selectedStations[0]);
-            let endIndex = estacionesArr.findIndex(s => parseInt(s.dataset.id) === selectedStations[1]);
+    function resetSeleccion() {
+        selectedStations = [];
+        modoCompraActivo = false;
+        document.getElementById('boleto-form').style.display = 'none';
+        document.getElementById('tiempo-espera-info').style.display = 'none';
+        document.querySelectorAll('.station-icon').forEach(i => i.style.borderColor = '#0e1a4f');
+    }
 
-            const estacionesEntre = Math.abs(endIndex - startIndex);
-            // Calcular hora estimada de llegada
-const minutosPorEstacion = 2;
-const minutosTotales = estacionesEntre * minutosPorEstacion;
+    stationElements.forEach(station => {
+        station.addEventListener('click', () => {
+            const id = parseInt(station.dataset.id);
+            const estacion = estaciones.find(e => e.EstID === id);
+            const clima = climas.find(c => c.EstID === id);
+            const zonas = destinos.filter(d => d.EstID === id);
 
-const ahora = new Date();
-ahora.setMinutes(ahora.getMinutes() + minutosTotales);
+            document.getElementById('info-nombre').textContent = estacion.EstNombre;
+            document.getElementById('info-clima').textContent = clima ? clima.CliClima : 'No disponible';
 
-const horas = ahora.getHours().toString().padStart(2, '0');
-const minutos = ahora.getMinutes().toString().padStart(2, '0');
+            const ul = document.getElementById('info-zonas');
+            ul.innerHTML = '';
+            if (zonas.length > 0) {
+                zonas.forEach(z => ul.innerHTML += `<li>${z.DesTNombre}</li>`);
+                document.getElementById('info-imagen').src = zonas[0].DesTImagen || 'https://via.placeholder.com/400x200';
+            } else {
+                ul.innerHTML = '<li>No registradas.</li>';
+                document.getElementById('info-imagen').src = 'https://via.placeholder.com/400x200';
+            }
 
-const horaEstimada = `${horas}:${minutos}`;
-document.getElementById('hora-estimada-llegada').textContent = horaEstimada;
-            const distancia = estacionesEntre * 5;
-            const costo = distancia * 1;
+            document.getElementById('info-panel').style.display = 'block';
 
-            document.getElementById('input-origen').value = selectedStations[0];
-            document.getElementById('input-destino').value = selectedStations[1];
-            document.getElementById('input-precio').value = costo.toFixed(2);
-            document.getElementById('input-distancia').value = distancia;
-            document.getElementById('input-ruta').value = trenRutaActual();
+            if (modoCompraActivo && selectedStations.length < 2 && !selectedStations.includes(id)) {
+                selectedStations.push(id);
+                station.querySelector('.station-icon').style.borderColor = '#ff9800';
 
-            document.getElementById('distancia-text').innerText = distancia;
-            document.getElementById('precio-text').innerText = costo.toFixed(2);
-            document.getElementById('boleto-form').style.display = 'block';
-        }
+                if (selectedStations.length === 1) {
+                    fetch(`/api/tiempo-espera/${id}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const mensaje = data.espera === 0
+                                ? "🚆 El tren aún no ha pasado por esta estación."
+                                : `⌛ El tren ya pasó. Tiempo de espera: ${data.espera} horas.`;
+                            document.getElementById('texto-tiempo-espera').textContent = mensaje;
+                            document.getElementById('tiempo-espera-info').style.display = 'block';
+                        });
+                }
+
+                if (selectedStations.length === 2) {
+                    const i1 = estaciones.findIndex(e => e.EstID === selectedStations[0]);
+                    const i2 = estaciones.findIndex(e => e.EstID === selectedStations[1]);
+                    const estacionesEntre = Math.abs(i2 - i1);
+                    const distancia = estacionesEntre * 5;
+                    const costo = distancia * 1;
+                    const ahora = new Date();
+                    ahora.setMinutes(ahora.getMinutes() + estacionesEntre * 2);
+                    const hora = ahora.getHours().toString().padStart(2, '0');
+                    const min = ahora.getMinutes().toString().padStart(2, '0');
+
+                    document.getElementById('input-origen').value = selectedStations[0];
+                    document.getElementById('input-destino').value = selectedStations[1];
+                    document.getElementById('input-precio').value = costo.toFixed(2);
+                    document.getElementById('input-distancia').value = distancia;
+                    document.getElementById('input-ruta').value = rutaActualGlobal;
+
+                    document.getElementById('distancia-text').textContent = distancia;
+                    document.getElementById('precio-text').textContent = costo.toFixed(2);
+                    document.getElementById('hora-estimada-llegada').textContent = `${hora}:${min}`;
+
+                    document.getElementById('boleto-form').style.display = 'block';
+                }
+            }
+        });
     });
-});
-
 </script>
-
-<script>
-   
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const tren = document.getElementById('tren');
-
-        function actualizarTren() {
-            fetch('/api/tren-posicion')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) {
-                        console.warn(data.error);
-                        return;
-                    }
-                     rutaActualGlobal = data.ruta_id || null;
-                    // Resaltar estación actual
-                    document.querySelectorAll('.station .circle').forEach(c => c.style.border = 'none');
-
-                    const actual = document.getElementById(`estacion-${data.estacion_actual}`);
-                    
-
-                    if (actual) {
-                        actual.querySelector('.circle').style.border = '3px solid yellow';
-
-                        // Posicionar tren visualmente sobre la estación
-                        const rectEstacion = actual.getBoundingClientRect();
-                        const rectLinea = document.getElementById('train-line').getBoundingClientRect();
-                        const offsetX = rectEstacion.left - rectLinea.left + 5;
-
-                        tren.style.transform = `translateX(${offsetX}px)`;
-                    }
-
-                    // Mostrar estado actual
-                   document.getElementById('estado-tren').textContent =
-    data.estado === 'en_movimiento' ? 'En movimiento' :
-    data.estado === 'detenido' ? 'Detenido' :
-    'Desconocido';
-
-                })
-                .catch(err => {
-                    console.error('Error al obtener datos del tren:', err);
-                });
-        }
-       
-
-        setInterval(actualizarTren, 3000); // Cada 3 segundos
-        actualizarTren(); // Llamar al inicio
-    });
-</script>
-
-<style>
-#tren {
-    position: absolute;
-    top: -40px; /* Más centrado verticalmente */
-    left: 0;
-    transition: transform 1.5s ease;
-    font-size: 32px; /* Un poco más grande para visibilidad */
-}
-</style>
-
 @endsection

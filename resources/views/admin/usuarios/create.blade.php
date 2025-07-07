@@ -1,52 +1,100 @@
 @extends('layouts.app')
 
 @section('content')
-    <h2>➕ Crear Nuevo Administrador</h2>
+    <style>
+        body {
+            background: linear-gradient(to right, #0e1a4f, #a0ffd0);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-    @if ($errors->any())
-        <div style="color:red;">
-            <strong>Errores:</strong>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>• {{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+        }
 
-    <form action="{{ route('admin.usuarios.store') }}" method="POST">
+        form {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 6px;
+        }
+
+        button {
+            background: #00c2ff;
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0099cc;
+        }
+
+        .volver {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        .volver:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: #ff7b7b;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+    </style>
+
+    <h2>➕ Crear nuevo Administrador</h2>
+
+    <form method="POST" action="{{ route('admin.usuarios.store') }}">
         @csrf
 
-        <div>
-            <label for="UsuNombres">Nombres:</label>
-            <input type="text" name="UsuNombres" required>
-        </div>
+        <label for="UsuNombres">Nombres:</label>
+        <input type="text" name="UsuNombres" value="{{ old('UsuNombres') }}" required>
+        @error('UsuNombres') <div class="error">{{ $message }}</div> @enderror
 
-        <div>
-            <label for="UsuApellidos">Apellidos:</label>
-            <input type="text" name="UsuApellidos" required>
-        </div>
+        <label for="UsuApellidos">Apellidos:</label>
+        <input type="text" name="UsuApellidos" value="{{ old('UsuApellidos') }}" required>
+        @error('UsuApellidos') <div class="error">{{ $message }}</div> @enderror
 
-        <div>
-            <label for="UsuCorreo">Correo:</label>
-            <input type="email" name="UsuCorreo" required>
-        </div>
-         <div>
-            <label for="UsuNumero">Correo:</label>
-            <input type="numero" name="UsuNumero" required>
-        </div>
+        <label for="UsuCorreo">Correo electrónico:</label>
+        <input type="email" name="UsuCorreo" value="{{ old('UsuCorreo') }}" required>
+        @error('UsuCorreo') <div class="error">{{ $message }}</div> @enderror
 
-        <div>
-            <label for="Usupassword">Contraseña:</label>
-            <input type="password" name="UsuPassword" required>
-        </div>
-<div>
-    <label for="UsuPassword_confirmation">Confirmar contraseña:</label>
-    <input type="password" name="UsuPassword_confirmation" required>
-</div>
-        <button type="submit">✅ Guardar Administrador</button>
+        <label for="password">Contraseña:</label>
+        <input type="password" name="password" required>
+        @error('password') <div class="error">{{ $message }}</div> @enderror
+
+        <label for="password_confirmation">Confirmar Contraseña:</label>
+        <input type="password" name="password_confirmation" required>
+
+        <button type="submit">💾 Guardar administrador</button>
     </form>
 
-    <br>
-    <a href="{{ route('admin.usuarios.index') }}">⬅️ Volver a la lista de usuarios</a>
+    <a class="volver" href="{{ route('admin.usuarios.index') }}">⬅️ Volver a la lista</a>
 @endsection

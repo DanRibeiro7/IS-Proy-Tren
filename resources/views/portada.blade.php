@@ -5,40 +5,67 @@
     <title>Bienvenido - Sistema de Tren</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: #f2f2f2;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #0e1a4f, #a0ffd0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #fff;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
             text-align: center;
-            padding: 50px;
         }
 
         h1 {
             font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
         }
 
         .botones a {
             display: inline-block;
-            margin: 20px;
-            padding: 12px 24px;
+            margin: 10px;
+            padding: 14px 28px;
             font-size: 1.1em;
-            background-color: #007bff;
-            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
             text-decoration: none;
-            border-radius: 8px;
+            color: #fff;
+            background-color: #007bff;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .botones a:hover {
             background-color: #0056b3;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
 
-    <h1>🚆 Bienvenido al Sistema de Reservas de Tren</h1>
-    <p>Explora las estaciones, destinos turísticos y compra tus boletos fácilmente.</p>
+    <div class="card">
+        <h1>🚆 Bienvenido al Sistema de Reservas de Tren</h1>
+        <p>Explora las estaciones, destinos turísticos y compra tus boletos fácilmente.</p>
 
-    <div class="botones">
-        <a href="{{ route('login') }}">Iniciar Sesión</a>
-        <a href="{{ route('register') }}">Registrarse</a>
+        <div class="botones">
+            <a href="{{ route('login') }}">Iniciar Sesión</a>
+            <a href="{{ route('register') }}">Registrarse</a>
+        </div>
     </div>
 
 </body>
