@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\DestinoTuristico;
 use App\Models\Estacion;
+use App\Models\TipoZona;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class DestinoTuristicoController extends Controller
@@ -23,8 +26,11 @@ class DestinoTuristicoController extends Controller
      */
     public function create()
     {
+        
+
         $estaciones = Estacion::all(); // para mostrar en un <select>
-        return view('destinos.create', compact('estaciones'));
+        $tiposZona = TipoZona::all();
+       return view('destinos.create', compact('estaciones', 'tiposZona'));
     }
 
     /**
@@ -36,12 +42,19 @@ class DestinoTuristicoController extends Controller
             'DesTNombre' => 'required',
             'DesTDescripcion' => 'required',
             'EstID' => 'required|exists:estacion,EstID',
+            'TipZonaID' => 'required|exists:tipo_zona,TipZonaID',
             'DesTUbicacion' => 'required',
+            'DesImagen' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+         $data = $request->except('DesImagen');
 
-        DestinoTuristico::create($request->all());
+          if ($request->hasFile('DesImagen')) {
+       $path = $request->file('DesImagen')->store('destinos', 'public');
+         $data['DesImagenURL'] = $path;
+    }
+     DestinoTuristico::create($data);
 
-        return redirect()->route('destinos.index')->with('success', 'Destino turístico creado correctamente');
+        return redirect()->route('destinos.index')->with('success', 'Destino turístico creado correctamente'); 
     }
 
     /**
@@ -60,7 +73,8 @@ class DestinoTuristicoController extends Controller
     {
         $destino = DestinoTuristico::findOrFail($id);
         $estaciones = Estacion::all();
-        return view('destinos.edit', compact('destino', 'estaciones'));
+        $tiposZona = TipoZona::all();
+        return view('destinos.edit', compact('destino', 'estaciones', 'tiposZona'));
     }
 
     /**
@@ -68,15 +82,24 @@ class DestinoTuristicoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-          $request->validate([
+        $request->validate([
             'DesTNombre' => 'required',
             'DesTDescripcion' => 'required',
             'EstID' => 'required|exists:estacion,EstID',
+            'TipZonaID' => 'required|exists:tipo_zona,TipZonaID',
             'DesTUbicacion' => 'required',
+            'DesImagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $destino = DestinoTuristico::findOrFail($id);
-        $destino->update($request->all());
+        $data = $request->except('DesImagen');
+
+        if ($request->hasFile('DesImagen')) {
+            $path = $request->file('DesImagen')->store('destinos', 'public');
+            $data['DesImagenURL'] = $path;
+        }
+
+        $destino->update($data);
 
         return redirect()->route('destinos.index')->with('success', 'Destino turístico actualizado correctamente');
     }

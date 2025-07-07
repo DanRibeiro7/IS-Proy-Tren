@@ -1,12 +1,23 @@
-@extends('layouts.app')
+<h2>🌟 Sugerencias para ti</h2>
 
-@section('title', 'Panel Administrador')
+<h3>Destinos sugeridos:</h3>
+<ul>
+@foreach($destinos as $destino)
+    <li>
+        <strong>{{ $destino->DesTNombre }}</strong> ({{ $destino->tipoZona->TipZonaNombre }})<br>
+        Estación: {{ $destino->estacion->EstNombre }}<br>
+        <img src="{{ asset('storage/' . $destino->DesImagenURL) }}" width="150">
+    </li>
+@endforeach
+</ul>
 
-@section('content')
-<p>Usuario autenticado: {{ auth()->user()->UsuNombres }}</p>
-<p>Rol: {{ auth()->user()->UsuTipoUsuario }}</p>
-
-    <h1>Bienvenido Administrador</h1>
-    <a href="{{ route('admin.linea') }}">🚆 Ver Línea del Tren</a>
-   
-@endsection
+<h3>Climas recomendados recientes:</h3>
+<ul>
+@foreach($climas as $clima)
+    <li>
+        📅 {{ $clima->CliFecha }} - 
+        {{ $clima->tipoClima->TipClimaNombre }} 
+        {!! climaEmoji($clima->tipoClima->TipClimaNombre) !!}
+    </li>
+@endforeach
+</ul>

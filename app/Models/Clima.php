@@ -12,6 +12,7 @@ class Clima extends Model
         'CliFecha',
         'CliClima',
         'EstID',
+        'TipClimaID',
         
     ];
     public $timestamps = false;
@@ -20,4 +21,8 @@ class Clima extends Model
     {
         return $this->belongsTo(Estacion::class, 'EstID');
     }
+    public function tipoClima()
+{
+    return $this->belongsTo(TipoClima::class, 'TipClimaID');
+}
 }

@@ -10,6 +10,7 @@
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Ubicación</th>
+                <th>Imagen</th>
                 <th>Estación</th>
                 <th>Acciones</th>
             </tr>
@@ -20,6 +21,13 @@
                     <td>{{ $destino->DesTNombre }}</td>
                     <td>{{ $destino->DesTDescripcion }}</td>
                     <td>{{ $destino->DesTUbicacion }}</td>
+                    <td>
+                        @if ($destino->DesImagenURL)
+                            <img src="{{ asset('storage/' . $destino->DesImagenURL) }}" width="150">
+                        @else
+                            Sin imagen
+                        @endif
+                    </td>
                     <td>{{ $destino->estacion->EstNombre ?? 'No asignado' }}</td>
                     <td>
                         <a href="{{ route('destinos.edit', $destino->DesTID) }}">Editar</a>

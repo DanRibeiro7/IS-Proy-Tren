@@ -1,5 +1,7 @@
-
 @extends('layouts.app')
+
+@section('content') {{-- 🔧 Aquí empieza la sección correcta --}}
+
 @if(Auth::user()->rol === 'cliente')
     <p>Estás navegando como <strong>Cliente</strong>.</p>
 @elseif(Auth::user()->rol === 'admin')
@@ -59,12 +61,22 @@
     @endforeach
 
 </div>
+<!-- Evaluar si el tren ya pasó por esta estación -->
+
+
+
+
+
 
 <div id="info" style="margin-top:30px; border:1px solid #ccc; padding:15px; display:none;">
     <h3>Información de Estación</h3>
    
 
     <div id="info-content"></div>
+    <div id="tiempo-espera-info" style="margin-top: 10px; display:none; font-weight: bold; color: #ff6600;">
+    ⏳ <span id="texto-tiempo-espera"></span>
+</div>
+
      <button id="activar-compra" onclick="iniciarCompra()">🎟️ Comprar Boleto</button>
     
 <div id="boleto-form" style="margin-top: 30px; display:none;">
@@ -152,6 +164,8 @@ function iniciarCompra() {
     document.getElementById('boleto-form').style.display = 'none';
     document.querySelectorAll('.circle').forEach(c => c.style.background = '#3490dc');
     document.querySelectorAll('.line').forEach(l => l.style.background = '#ccc');
+    document.getElementById('tiempo-espera-info').style.display = 'none';
+
 }
 
   
@@ -207,10 +221,32 @@ function iniciarCompra() {
         document.getElementById('info-content').innerHTML = html;
         document.getElementById('info').style.display = 'block';
 
-        if (modoCompraActivo && selectedStations.length < 2 && !selectedStations.includes(estId)) {
-            selectedStations.push(estId);
-            stationDiv.querySelector('.circle').style.background = '#e3342f';
-        }
+       if (modoCompraActivo && selectedStations.length < 2 && !selectedStations.includes(estId)) {
+    selectedStations.push(estId);
+    stationDiv.querySelector('.circle').style.background = '#e3342f';
+
+    if (selectedStations.length === 1) {
+        // Llamar a la API para ver si el tren ya pasó por esta estación
+        fetch(`/api/tiempo-espera/${estId}`)
+            .then(res => res.json())
+            .then(data => {
+                const esperaDiv = document.getElementById('tiempo-espera-info');
+                const textoEspera = document.getElementById('texto-tiempo-espera');
+
+                if (data.espera === 0) {
+                    textoEspera.textContent = "🚆 El tren aún no ha pasado por esta estación.";
+                } else {
+                    textoEspera.textContent = `⌛ El tren ya pasó. Tiempo estimado de espera para el próximo recorrido: ${data.espera} horas.`;
+                }
+
+                esperaDiv.style.display = 'block';
+            })
+            .catch(err => {
+                console.error('Error al consultar tiempo de espera:', err);
+            });
+    }
+}
+
 
         if (modoCompraActivo && selectedStations.length === 2){
             

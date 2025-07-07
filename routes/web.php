@@ -32,6 +32,8 @@ Route::post('/register', [AuthController::class, 'registrar']);
 
 // API para la posición del tren (para JavaScript)
 Route::get('/api/tren-posicion', [TrenPosicionController::class, 'estadoActual']);
+Route::get('/api/tiempo-espera/{estacion_id}', [TrenPosicionController::class, 'tiempoEspera']);
+
 
 
 /*
@@ -59,6 +61,9 @@ Route::middleware(['auth', 'esCliente'])->prefix('cliente')->group(function () {
     Route::get('/boleto/{id}', [ClienteController::class, 'verBoleto'])->name('cliente.ver_boleto');
     Route::get('/historial-boletos', [ClienteController::class, 'historialBoletos'])->name('cliente.historial');
 Route::put('/cliente/boletos/{id}/anular', [ClienteController::class, 'anularBoleto'])->name('cliente.anular_boleto');
+
+    Route::get('/cliente/preferencias', [ClienteController::class, 'mostrarFormularioPreferencias'])->name('cliente.preferencias.form');
+    Route::post('/cliente/preferencias', [ClienteController::class, 'guardarPreferencias'])->name('cliente.preferencias.guardar');
 
 });
 

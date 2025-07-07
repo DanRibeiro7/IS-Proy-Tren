@@ -12,7 +12,9 @@ class DestinoTuristico extends Model
         'DesTNombre',
         'DesTDescripcion',
         'EstID',
-        'DesTUbicacion'
+        'DesTUbicacion',
+        'TipZonaID',
+        'DesImagenURL',
     ];
     public $timestamps = false;
 
@@ -20,4 +22,11 @@ class DestinoTuristico extends Model
     {
         return $this->belongsTo(Estacion::class, 'EstID');
     }
+    // app/Models/DestinoTuristico.php
+
+public function tipoZona()
+{
+    return $this->belongsTo(TipoZona::class, 'TipZonaID');
+}
+
 }

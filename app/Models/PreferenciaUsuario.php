@@ -14,6 +14,8 @@ class PreferenciaUsuario extends Model
         'PreUTipoZona',
         'PreUClimaDeseado',
         'PreUDistanciaMaxima',
+        'TipZonaID',
+        'TipClimaID',
 
     ];
     public $timestamps = false;
@@ -28,5 +30,15 @@ class PreferenciaUsuario extends Model
     {
         return $this->belongsTo(Estacion::class, 'EstID');
     }
+    public function tipoZona()
+{
+    return $this->belongsTo(TipoZona::class, 'TipZonaID');
+}
+
+public function tipoClima()
+{
+    return $this->belongsTo(TipoClima::class, 'TipClimaID');
+}
+
 
 }
