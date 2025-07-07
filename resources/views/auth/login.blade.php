@@ -90,6 +90,7 @@
             <button type="submit">Ingresar</button>
         </form>
 
-        <a class="volver" href="{{ url()->previous() }}">⬅️ Volver</a>
+        <a class="volver" href="{{ route('portada') }}">⬅️ Volver</a>
+
     </div>
 @endsection

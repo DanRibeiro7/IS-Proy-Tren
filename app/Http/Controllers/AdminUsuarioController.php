@@ -8,13 +8,33 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminUsuarioController extends Controller
 {
- public function index()
+ public function index(Request $request)
 {
-    $clientes = Usuario::where('UsuTipoUsuario', 'cliente')->get();
-    $admins = Usuario::where('UsuTipoUsuario', 'admin')->get();
+    // Buscar administradores
+    $admins = Usuario::where('UsuTipoUsuario', 'admin')
+        ->when($request->filled('buscar_admin'), function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('UsuNombres', 'like', '%' . $request->buscar_admin . '%')
+                  ->orWhere('UsuApellidos', 'like', '%' . $request->buscar_admin . '%')
+                  ->orWhere('UsuCorreo', 'like', '%' . $request->buscar_admin . '%');
+            });
+        })
+        ->get();
+
+    // Buscar clientes
+    $clientes = Usuario::where('UsuTipoUsuario', 'cliente')
+        ->when($request->filled('buscar_cliente'), function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('UsuNombres', 'like', '%' . $request->buscar_cliente . '%')
+                  ->orWhere('UsuApellidos', 'like', '%' . $request->buscar_cliente . '%')
+                  ->orWhere('UsuCorreo', 'like', '%' . $request->buscar_cliente . '%');
+            });
+        })
+        ->get();
 
     return view('admin.usuarios.index', compact('clientes', 'admins'));
 }
+
 
     public function create()
     {

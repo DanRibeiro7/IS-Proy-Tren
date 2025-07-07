@@ -88,16 +88,19 @@
             @csrf
 
             <label for="UsuNombres">Nombres</label>
-            <input type="text" name="UsuNombres" id="UsuNombres" value="{{ old('UsuNombres') }}" required>
+<input type="text" name="UsuNombres" id="UsuNombres" value="{{ old('UsuNombres') }}"
+       required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
 
-            <label for="UsuApellidos">Apellidos</label>
-            <input type="text" name="UsuApellidos" id="UsuApellidos" value="{{ old('UsuApellidos') }}" required>
+<label for="UsuApellidos">Apellidos</label>
+<input type="text" name="UsuApellidos" id="UsuApellidos" value="{{ old('UsuApellidos') }}"
+       required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
 
             <label for="UsuCorreo">Correo electrónico</label>
             <input type="email" name="UsuCorreo" id="UsuCorreo" value="{{ old('UsuCorreo') }}" required>
 
             <label for="UsuNumero">Número de contacto</label>
-            <input type="text" name="UsuNumero" id="UsuNumero" value="{{ old('UsuNumero') }}" required>
+<input type="text" name="UsuNumero" id="UsuNumero" value="{{ old('UsuNumero') }}"
+       required pattern="[1-9]+" title="Solo números del 1 al 9">
 
             <label for="UsuPassword">Contraseña</label>
             <input type="password" name="UsuPassword" id="UsuPassword" required>
@@ -109,6 +112,7 @@
             <button type="submit">Registrarse</button>
         </form>
 
-        <a class="volver" href="{{ url()->previous() }}">⬅️ Volver</a>
+        <a class="volver" href="{{ route('portada') }}">⬅️ Volver</a>
+
     </div>
 @endsection

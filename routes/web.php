@@ -64,6 +64,7 @@ Route::put('/cliente/boletos/{id}/anular', [ClienteController::class, 'anularBol
 
     Route::get('/cliente/preferencias', [ClienteController::class, 'mostrarFormularioPreferencias'])->name('cliente.preferencias.form');
     Route::post('/cliente/preferencias', [ClienteController::class, 'guardarPreferencias'])->name('cliente.preferencias.guardar');
+    Route::get('/cliente/boletos/{id}/pdf', [ClienteController::class, 'descargarPDF'])->name('cliente.descargar_pdf');
 
 });
 
@@ -91,6 +92,17 @@ Route::middleware(['auth', 'esAdmin'])->prefix('admin')->group(function () {
     Route::resource('usuarios', UsuarioController::class);
     Route::resource('rutas', RutaController::class);
   
+    Route::resource('admin/clientes', AdminClienteController::class)
+    ->names([
+        'index' => 'admin.clientes.index',
+        'create' => 'admin.clientes.create',
+        'store' => 'admin.clientes.store',
+        'edit' => 'admin.clientes.edit',
+        'update' => 'admin.clientes.update',
+        'destroy' => 'admin.clientes.destroy',
+    ])
+    ->middleware('auth'); // O usa tu middleware EsAdmin
+
     
  Route::get('/', [AdminUsuarioController::class, 'index'])->name('admin.usuarios.index');
     Route::get('/crear', [AdminUsuarioController::class, 'create'])->name('admin.usuarios.create');
@@ -99,5 +111,8 @@ Route::middleware(['auth', 'esAdmin'])->prefix('admin')->group(function () {
     Route::put('/{id}', [AdminUsuarioController::class, 'update'])->name('admin.usuarios.update');
     Route::delete('/{id}', [AdminUsuarioController::class, 'destroy'])->name('admin.usuarios.destroy');
      Route::get('/admin/boletos/historial', [\App\Http\Controllers\AdminBoletoController::class, 'historial'])->name('admin.boletos.historial');
+         Route::get('/boletos/{id}', [AdminController::class, 'verBoleto'])->name('admin.ver_boleto');
+    Route::put('/boletos/{id}/anular', [AdminController::class, 'anularBoleto'])->name('admin.anular_boleto');
+    Route::get('/boletos/{id}/pdf', [AdminController::class, 'generarPDF'])->name('admin.boleto_pdf');
 
 });

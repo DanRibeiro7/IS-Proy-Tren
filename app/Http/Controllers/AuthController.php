@@ -46,13 +46,14 @@ class AuthController extends Controller
 
 public function registrar(Request $request)
 {
-    $request->validate([
-           'UsuNombres' => 'required|string|max:255',
-        'UsuApellidos' => 'required|string|max:255',
-        'UsuCorreo' => 'required|email|unique:usuario,UsuCorreo',
-        'UsuNumero' => 'required|string|max:20',
-        'UsuPassword' => 'required|string|confirmed|min:6',
-    ]);
+  $request->validate([
+    'UsuNombres' => ['required', 'regex:/^[\pL\s]+$/u', 'max:255'],
+    'UsuApellidos' => ['required', 'regex:/^[\pL\s]+$/u', 'max:255'],
+    'UsuCorreo' => ['required', 'email', 'unique:usuario,UsuCorreo'],
+    'UsuNumero' => ['required', 'regex:/^[1-9]+$/', 'max:20'],
+    'UsuPassword' => ['required', 'string', 'min:8', 'confirmed'],
+]);
+
 
     $usuario = Usuario::create([
             'UsuNombres' => $request->UsuNombres,

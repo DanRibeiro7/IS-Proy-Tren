@@ -12,6 +12,8 @@ use App\Models\DestinoTuristico; // ✅ IMPORTACIÓN FALTANTE
 use App\Models\PreferenciaUsuario;
 use App\Models\TipoClima;
 use App\Models\TipoZona;
+use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 
 
@@ -86,7 +88,15 @@ public function guardarPreferencias(Request $request)
         'EstID' => 'required|exists:estacion,EstID',
         'TipZonaID' => 'required|exists:tipo_zona,TipZonaID',
         'TipClimaID' => 'required|exists:tipo_clima,TipClimaID',
-        'PreUDistanciaMaxima' => 'required|numeric',
+        'PreUDistanciaMaxima' => 'required|numeric|min:0.1|max:1000',
+    ], [
+        'EstID.required' => 'Debes seleccionar una estación.',
+        'TipZonaID.required' => 'Debes seleccionar un tipo de zona turística.',
+        'TipClimaID.required' => 'Debes seleccionar un tipo de clima.',
+        'PreUDistanciaMaxima.required' => 'Ingresa una distancia máxima.',
+        'PreUDistanciaMaxima.numeric' => 'La distancia debe ser un número.',
+        'PreUDistanciaMaxima.min' => 'La distancia mínima es 0.1 km.',
+        'PreUDistanciaMaxima.max' => 'La distancia máxima permitida es 1000 km.',
     ]);
 
     PreferenciaUsuario::updateOrCreate(
@@ -101,6 +111,7 @@ public function guardarPreferencias(Request $request)
 
     return redirect()->route('cliente.dashboard')->with('success', 'Preferencias guardadas correctamente.');
 }
+
 
 
 
@@ -171,6 +182,20 @@ public function anularBoleto($id)
     $boleto->save();
 
     return back()->with('success', 'Boleto anulado correctamente.');
+}
+public function descargarPDF($id)
+{
+    $boleto = Boleto::with(['usuario', 'estacion_origen', 'estacion_destino'])->findOrFail($id);
+
+    // Contenido para codificar en el QR
+    $qrData = "Boleto ID: {$boleto->BolID}, Cliente: {$boleto->usuario->UsuNombres}, Origen: {$boleto->estacion_origen->EstNombre}, Destino: {$boleto->estacion_destino->EstNombre}";
+
+    // Generar SVG (sin Imagick)
+    $qrCodeSvg = QrCode::format('svg')->size(150)->generate($qrData);
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('cliente.pdf_boleto', compact('boleto', 'qrCodeSvg'));
+
+    return $pdf->download("boleto_{$boleto->BolID}.pdf");
 }
 
 

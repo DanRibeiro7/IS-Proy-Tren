@@ -9,20 +9,20 @@ class Boleto extends Model
     protected $table = 'boleto';
     protected $primaryKey = 'BolID';
 
-    protected $fillable = [
-        'UsuID',
-        'RutID',
-        'BolFechaviaje',
-        'BolHoraSalida',
-        'BolHoraLlegada',
-        'BolDistanciaKM',
-        'BolPrecio',
-        'BolMetodoPago',
-        'BolEstado',
-        'BolCreadoEn',
-        'BolEstacionOrigen',
-        'BolEstacionDestino',
-    ];
+protected $fillable = [
+    'UsuID',
+    'RutID',
+    'BolFechaviaje',
+    'BolHoraSalida',
+    'BolHoraLlegada',
+    'BolPrecio',
+    'BolDistanciaKM',
+    'BolMetodoPago',
+    'BolEstado',
+    'BolCreadoEn',
+    'BolEstacionOrigen',
+    'BolEstacionDestino',
+];
 
     public $timestamps = false;
 

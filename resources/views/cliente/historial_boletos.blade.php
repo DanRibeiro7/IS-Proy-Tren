@@ -113,7 +113,7 @@
                         <form action="{{ route('cliente.anular_boleto', $boleto->BolID) }}" method="POST" style="display:inline;">
                             @csrf
                             @method('PUT')
-                            <button type="submit">❌ Anular</button>
+                            
                         </form>
                     @endif
                 </td>

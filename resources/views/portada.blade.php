@@ -59,7 +59,7 @@
 <body>
 
     <div class="card">
-        <h1>🚆 Bienvenido al Sistema de Reservas de Tren</h1>
+        <h1>🚆 Bienvenido al Sistema del Tren Turisitico</h1>
         <p>Explora las estaciones, destinos turísticos y compra tus boletos fácilmente.</p>
 
         <div class="botones">

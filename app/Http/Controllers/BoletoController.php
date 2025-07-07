@@ -26,19 +26,20 @@ class BoletoController extends Controller
 
 public function store(Request $request)
 {
-    // Validación de los campos
+    // Validación
     $request->validate([
-        'estacion_origen_id'   => 'required|integer|exists:estacion,EstID',
-        'estacion_destino_id'  => 'required|integer|exists:estacion,EstID',
-        'precio'               => 'required|numeric|min:0',
-        'distancia_km'         => 'required|numeric|min:0',
-        'ruta_id'              => 'required|integer|exists:ruta,RutID',
-        'metodo_pago'          => 'required|string|max:50',
+        'estacion_origen_id' => 'required|exists:estacion,EstID',
+        'estacion_destino_id' => 'required|exists:estacion,EstID',
+        'metodo_pago' => 'required|string|max:50',
+        'precio_unitario' => 'required|numeric|min:0',
+        'distancia' => 'required|numeric|min:0',
+        'cantidad' => 'required|integer|min:1|max:5',
+        'ruta_id' => 'required|exists:ruta,RutID',
     ]);
 
-    // Obtener el tren actual y su estación
     $tren = Tren::first();
 
+    // Detectar si ya pasó la estación origen
     $ordenActual = RutaEstacion::where('RutaID', $request->ruta_id)
         ->where('EstacionID', $tren->TrenEstacionActual)
         ->value('Orden');
@@ -51,28 +52,38 @@ public function store(Request $request)
         return redirect()->back()->with('error', '❌ El tren ya pasó por la estación de origen.');
     }
 
-    // Calcular hora estimada de llegada (1 km = 1 minuto)
-    $minutosExtra = (int) $request->distancia_km;
-    $horaLlegada = now()->addMinutes($minutosExtra)->format('H:i:s');
+    // Calcular tiempos
+    $horaSalida = now();
+    $horaLlegada = now()->addMinutes(($request->distancia / 5) * 10);
 
-    // Crear el boleto
-    $boleto = Boleto::create([
-        'UsuID'              => auth()->user()->UsuID ?? 1,
-        'RutID'              => $request->ruta_id,
-        'BolFechaviaje'      => now()->toDateString(),
-        'BolHoraSalida'      => now()->format('H:i:s'),
-        'BolHoraLlegada'     => $horaLlegada,
-        'BolPrecio'          => $request->precio,
-        'BolDistanciaKM'     => $request->distancia_km,
-        'BolMetodoPago'      => $request->metodo_pago,
-        'BolEstado'          => 'pendiente',
-        'BolCreadoEn'        => now(),
-        'BolEstacionOrigen'  => $request->estacion_origen_id,
-        'BolEstacionDestino' => $request->estacion_destino_id,
-    ]);
+    // Datos del usuario logueado
+    $usuario = auth()->user();
+    if (!$usuario) {
+        return redirect()->back()->with('error', 'Debe iniciar sesión para comprar.');
+    }
 
-    return redirect()->route('cliente.ver_boleto', ['id' => $boleto->BolID])
-        ->with('success', '🎫 Boleto comprado con éxito');
+    try {
+        $boleto = Boleto::create([
+            'UsuID'              => $usuario->UsuID,
+            'RutID'              => $request->ruta_id,
+            'BolFechaviaje'      => now()->toDateString(),
+            'BolHoraSalida'      => $horaSalida->format('H:i:s'),
+            'BolHoraLlegada'     => $horaLlegada->format('H:i:s'),
+            'BolPrecio'          => $request->precio_unitario * $request->cantidad,
+            'BolDistanciaKM'     => $request->distancia,
+            'BolMetodoPago'      => $request->metodo_pago,
+            'BolEstado'          => 'pendiente',
+            'BolCreadoEn'        => now(),
+            'BolEstacionOrigen'  => $request->estacion_origen_id,
+            'BolEstacionDestino' => $request->estacion_destino_id,
+        ]);
+     
+
+        return redirect()->route('cliente.ver_boleto', $boleto->BolID)
+            ->with('success', '🎫 Boleto comprado con éxito');
+    } catch (\Exception $e) {
+        return back()->with('error', 'Error al guardar: ' . $e->getMessage());
+    }
 }
 
 

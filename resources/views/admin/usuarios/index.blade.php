@@ -89,7 +89,14 @@
     @endif
 
     {{-- Administradores --}}
+  
+
     <h3>🛡️ Administradores</h3>
+    {{-- 🔍 Búsqueda para ADMINISTRADORES --}}
+<form method="GET" action="{{ route('admin.usuarios.index') }}" style="text-align:center; margin-bottom: 20px;">
+    <input type="text" name="buscar_admin" placeholder="Buscar administrador..." value="{{ request('buscar_admin') }}" style="padding: 8px; width: 250px; border-radius: 6px;">
+    <button type="submit">🔍 Buscar</button>
+</form>
     <a href="{{ route('admin.usuarios.create') }}" class="crear-link">➕ Crear nuevo administrador</a>
 
     @if($admins->isEmpty())
@@ -122,6 +129,12 @@
 
     {{-- Clientes --}}
     <h3>👤 Clientes</h3>
+    {{-- 🔍 Búsqueda para CLIENTES --}}
+<form method="GET" action="{{ route('admin.usuarios.index') }}" style="text-align:center; margin-bottom: 20px;">
+    <input type="text" name="buscar_cliente" placeholder="Buscar cliente..." value="{{ request('buscar_cliente') }}" style="padding: 8px; width: 250px; border-radius: 6px;">
+    <button type="submit">🔍 Buscar</button>
+</form>
+    <a href="{{ route('admin.clientes.create') }}" class="crear-link">➕ Crear nuevo cliente</a>
     @if($clientes->isEmpty())
         <p style="text-align:center;">No hay clientes registrados.</p>
     @else
@@ -130,12 +143,21 @@
                 <th>ID</th>
                 <th>Nombre completo</th>
                 <th>Correo</th>
+                <th>Acciones</th>
+
             </tr>
             @foreach($clientes as $cliente)
                 <tr>
                     <td>{{ $cliente->UsuID }}</td>
                     <td>{{ $cliente->UsuNombres }} {{ $cliente->UsuApellidos }}</td>
                     <td>{{ $cliente->UsuCorreo }}</td>
+                     <td>
+            <a href="{{ route('admin.clientes.edit', $cliente->UsuID) }}">✏️</a>
+            <form action="{{ route('admin.clientes.destroy', $cliente->UsuID) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar este cliente?');">
+                @csrf @method('DELETE')
+                <button type="submit">🗑️</button>
+            </form>
+        </td>
                 </tr>
             @endforeach
         </table>

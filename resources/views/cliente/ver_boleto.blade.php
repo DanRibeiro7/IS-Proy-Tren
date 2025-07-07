@@ -123,17 +123,26 @@
         <td>{{ $boleto->BolHoraLlegada }}</td>
     </tr>
     <tr>
-        <th>Distancia</th>
-        <td>{{ $boleto->BolDistanciaKM }} km</td>
-    </tr>
-    <tr>
-        <th>Precio</th>
-        <td>S/ {{ number_format($boleto->BolPrecio, 2) }}</td>
-    </tr>
-    <tr>
-        <th>Método de pago</th>
-        <td>{{ ucfirst($boleto->BolMetodoPago) }}</td>
-    </tr>
+    <th>Distancia</th>
+    <td>{{ $boleto->BolDistanciaKM }} km</td>
+</tr>
+<tr>
+    <th>Cantidad de personas</th>
+    <td>{{ $boleto->BolCantidadPersonas ?? 1 }}</td>
+</tr>
+<tr>
+    <th>Precio por persona</th>
+    <td>S/ {{ number_format($boleto->BolPrecio / max($boleto->BolCantidadPersonas, 1), 2) }}</td>
+</tr>
+<tr>
+    <th>Total a pagar</th>
+    <td><strong>S/ {{ number_format($boleto->BolPrecio, 2) }}</strong></td>
+</tr>
+<tr>
+    <th>Método de pago</th>
+    <td>{{ ucfirst($boleto->BolMetodoPago) }}</td>
+</tr>
+
     <tr>
         <th>Estado</th>
         <td>
@@ -151,11 +160,14 @@
         <form action="{{ route('cliente.anular_boleto', $boleto->BolID) }}" method="POST" onsubmit="return confirm('¿Estás seguro de anular este boleto?');" style="display:inline-block;">
             @csrf
             @method('PUT')
-            <button type="submit" class="anular">❌ Anular Boleto</button>
+            
         </form>
     @endif
 
     <br><br>
     <a class="volver" href="{{ route('cliente.linea_tren') }}">⬅️ Volver a la Línea del Tren</a>
+
 </div>
+<a class="volver" href="{{ route('cliente.descargar_pdf', $boleto->BolID) }}" target="_blank">📄 Descargar en PDF</a>
+
 @endsection

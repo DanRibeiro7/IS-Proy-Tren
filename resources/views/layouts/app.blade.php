@@ -62,10 +62,14 @@
                 <a href="{{ route('admin.boletos.historial') }}">📈 Reportes</a> 
             @endif
 
-            <a href="{{ route('logout') }}"
-               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                🚪 Cerrar Sesión
-            </a>
+         <a href="{{ route('logout') }}"
+   onclick="event.preventDefault(); 
+            if (confirm('¿Estás seguro de cerrar sesión?')) { 
+                document.getElementById('logout-form').submit(); 
+            }">
+    🚪 Cerrar Sesión
+</a>
+
 
             <form id="logout-form" method="POST" action="{{ route('logout') }}" style="display:none;">
                 @csrf

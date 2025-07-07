@@ -62,29 +62,36 @@
 <form action="{{ route('cliente.preferencias.guardar') }}" method="POST">
     @csrf
 
-    <label for="EstID">📍 Estación más cercana:</label>
-    <select name="EstID" id="EstID" required>
-        @foreach($estaciones as $est)
-            <option value="{{ $est->EstID }}">{{ $est->EstNombre }}</option>
-        @endforeach
-    </select>
+   <!-- Estación más cercana -->
+<select name="EstID" id="EstID" required>
+    <option value="">-- Selecciona una estación --</option>
+    @foreach($estaciones as $est)
+        <option value="{{ $est->EstID }}">{{ $est->EstNombre }}</option>
+    @endforeach
+</select>
 
-    <label for="TipZonaID">🏞️ Tipo de zona turística preferida:</label>
-    <select name="TipZonaID" id="TipZonaID" required>
-        @foreach($tiposZona as $zona)
-            <option value="{{ $zona->TipZonaID }}">{{ $zona->TipZonaNombre }}</option>
-        @endforeach
-    </select>
+<!-- Tipo de zona -->
+<select name="TipZonaID" id="TipZonaID" required>
+    <option value="">-- Selecciona un tipo de zona --</option>
+    @foreach($tiposZona as $zona)
+        <option value="{{ $zona->TipZonaID }}">{{ $zona->TipZonaNombre }}</option>
+    @endforeach
+</select>
 
-    <label for="TipClimaID">🌤️ Tipo de clima deseado:</label>
-    <select name="TipClimaID" id="TipClimaID" required>
-        @foreach($tiposClima as $clima)
-            <option value="{{ $clima->TipClimaID }}">{{ $clima->TipClimaNombre }}</option>
-        @endforeach
-    </select>
+<!-- Tipo de clima -->
+<select name="TipClimaID" id="TipClimaID" required>
+    <option value="">-- Selecciona un tipo de clima --</option>
+    @foreach($tiposClima as $clima)
+        <option value="{{ $clima->TipClimaID }}">{{ $clima->TipClimaNombre }}</option>
+    @endforeach
+</select>
 
-    <label for="PreUDistanciaMaxima">📏 Distancia máxima desde estación (km):</label>
-    <input type="number" name="PreUDistanciaMaxima" id="PreUDistanciaMaxima" required step="0.1" placeholder="Ej. 10.5">
+<!-- Distancia máxima -->
+<input type="number" name="PreUDistanciaMaxima" id="PreUDistanciaMaxima"
+    required step="0.1" min="0.1" max="1000"
+    placeholder="Ej. 10.5"
+    title="Ingresa una distancia válida entre 0.1 y 1000 km">
+
 
     <button type="submit">✅ Guardar preferencias</button>
 </form>
