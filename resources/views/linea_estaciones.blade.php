@@ -56,15 +56,29 @@
 
 
     .zigzag {
-        position: absolute;
-        top: 25px;
-        height: 4px;
-        background: white;
-        z-index: 1;
-    }
+    position: absolute;
+    top: 25px;
+    height: 8px;
+    background: repeating-linear-gradient(
+        45deg,
+        #FFD700,
+        #FFD700 10px,
+        #000 10px,
+        #000 15px
+    );
+    z-index: 1;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
 
-    .zigzag.down { transform: translateY(20px) rotate(10deg); }
-    .zigzag.up { transform: translateY(-20px) rotate(-10deg); }
+.zigzag.down {
+    transform: translateY(20px) rotate(6deg);
+}
+
+.zigzag.up {
+    transform: translateY(-20px) rotate(-6deg);
+}
+
 
     .train {
         position: absolute;
@@ -137,6 +151,50 @@
     outline: none;
     box-shadow: 0 0 6px rgba(0, 188, 212, 0.8);
 }
+.boleto-card {
+    background: #ffffff;
+    color: #333;
+    max-width: 600px;
+    margin: 30px auto;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.boleto-card form > p,
+.boleto-card label {
+    font-weight: bold;
+    margin-top: 15px;
+    display: block;
+}
+
+.boleto-card select,
+.boleto-card input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.boleto-card button {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #00bcd4;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.boleto-card button:hover {
+    background: #0097a7;
+}
+
 
 
 </style>
@@ -175,15 +233,23 @@
         ⏳ <span id="texto-tiempo-espera"></span>
     </div>
 
-    @auth
-   @if(auth()->user()->UsuRol == 2) {{-- Solo para clientes --}}
-    <button onclick="iniciarCompra()">🎟️ Comprar Boleto</button>
-@endif
-
+@auth
+    @if(auth()->user()->UsuTipoUsuario === 'cliente') {{-- Solo para clientes --}}
+        <button onclick="iniciarCompra()">🎟️ Comprar Boleto</button>
+    @endif
 @endauth
 
 
-    <form method="POST" action="{{ route('boleto.store') }}" id="boleto-form" style="margin-top: 20px; display:none;">
+
+   <div class="boleto-card" id="boleto-form" style="display:none;">
+    <form method="POST" action="{{ route('boleto.store') }}">
+        <h2 style="text-align:center; color:#0e1a4f; margin-top: 20px;">🎟️ Comprar Boleto de Tren</h2>
+
+ <p><strong>Origen:</strong> <span id="nombre-origen">--</span></p>
+        <p><strong>Destino:</strong> <span id="nombre-destino">--</span></p>
+        
+        <!-- inputs ocultos -->
+
         @csrf
         <input type="hidden" name="estacion_origen_id" id="input-origen">
         <input type="hidden" name="estacion_destino_id" id="input-destino">
@@ -344,6 +410,13 @@ stationElements.forEach(station => {
                 document.getElementById('input-ruta').value = rutaActualGlobal;
                 document.getElementById('input-origen').value = origenID;
                 document.getElementById('input-destino').value = destinoID;
+
+                const origenNombre = estaciones.find(e => e.EstID === origenID)?.EstNombre || '--';
+const destinoNombre = estaciones.find(e => e.EstID === destinoID)?.EstNombre || '--';
+
+document.getElementById('nombre-origen').textContent = origenNombre;
+document.getElementById('nombre-destino').textContent = destinoNombre;
+
 
                 document.getElementById('distancia-text').textContent = distancia;
                 document.getElementById('precio-text').textContent = precioUnitario.toFixed(2);
