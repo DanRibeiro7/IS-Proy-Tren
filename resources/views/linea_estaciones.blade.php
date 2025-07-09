@@ -141,7 +141,7 @@
 
 </style>
 
-<h1>🚆 Línea del Tren Interurbano</h1>
+<h1>🚆 Línea del Tren PERU RAIL</h1>
 
 <div class="alerta" id="mensaje-alerta" style="display: none;"></div>
 <div style="text-align: center; margin-top: 10px;">
@@ -175,7 +175,13 @@
         ⏳ <span id="texto-tiempo-espera"></span>
     </div>
 
+    @auth
+   @if(auth()->user()->UsuRol == 2) {{-- Solo para clientes --}}
     <button onclick="iniciarCompra()">🎟️ Comprar Boleto</button>
+@endif
+
+@endauth
+
 
     <form method="POST" action="{{ route('boleto.store') }}" id="boleto-form" style="margin-top: 20px; display:none;">
         @csrf

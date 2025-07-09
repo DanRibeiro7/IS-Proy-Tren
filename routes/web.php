@@ -12,7 +12,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\RutaController;
 use App\Http\Controllers\BoletoController;
 use App\Http\Controllers\TrenPosicionController;
-
+use App\Http\Controllers\AdminClienteController;
 /*
 |--------------------------------------------------------------------------
 | Rutas Públicas

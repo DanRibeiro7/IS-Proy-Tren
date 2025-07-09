@@ -82,7 +82,7 @@
 
     <h1>🚉 Listado de Estaciones</h1>
 
-    <a href="{{ route('estacions.create') }}" class="crear-link">➕ Nueva Estación</a>
+    
 
     <table>
         <thead>
@@ -103,7 +103,7 @@
                         <form action="{{ route('estacions.destroy', $estacion->EstID) }}" method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar esta estación?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit">🗑️ Eliminar</button>
+                            
                         </form>
                     </td>
                 </tr>

@@ -88,31 +88,48 @@
             @csrf
 
             <label for="UsuNombres">Nombres</label>
-<input type="text" name="UsuNombres" id="UsuNombres" value="{{ old('UsuNombres') }}"
-       required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
+            <input type="text" name="UsuNombres" id="UsuNombres" value="{{ old('UsuNombres') }}"
+                   required maxlength="100" title="Solo letras y espacios">
 
-<label for="UsuApellidos">Apellidos</label>
-<input type="text" name="UsuApellidos" id="UsuApellidos" value="{{ old('UsuApellidos') }}"
-       required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
+            <label for="UsuApellidos">Apellidos</label>
+            <input type="text" name="UsuApellidos" id="UsuApellidos" value="{{ old('UsuApellidos') }}"
+                   required maxlength="100" title="Solo letras y espacios">
 
             <label for="UsuCorreo">Correo electrónico</label>
             <input type="email" name="UsuCorreo" id="UsuCorreo" value="{{ old('UsuCorreo') }}" required>
 
             <label for="UsuNumero">Número de contacto</label>
-<input type="text" name="UsuNumero" id="UsuNumero" value="{{ old('UsuNumero') }}"
-       required pattern="[1-9]+" title="Solo números del 1 al 9">
+            <input type="text" name="UsuNumero" id="UsuNumero" value="{{ old('UsuNumero') }}"
+                   required maxlength="9" title="Debe contener 9 números">
 
             <label for="UsuPassword">Contraseña</label>
             <input type="password" name="UsuPassword" id="UsuPassword" required>
 
-            <label for="password_confirmation">Confirmar contraseña</label>
+            <label for="UsuPassword_confirmation">Confirmar contraseña</label>
             <input type="password" name="UsuPassword_confirmation" id="UsuPassword_confirmation" required>
-
 
             <button type="submit">Registrarse</button>
         </form>
 
         <a class="volver" href="{{ route('portada') }}">⬅️ Volver</a>
-
     </div>
+
+    <script>
+        // Solo letras y espacios
+        const soloLetras = (e) => {
+            const char = String.fromCharCode(e.which);
+            const regex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+            if (!regex.test(char)) e.preventDefault();
+        };
+
+        // Solo números
+        const soloNumeros = (e) => {
+            const char = String.fromCharCode(e.which);
+            if (!/[0-9]/.test(char)) e.preventDefault();
+        };
+
+        document.getElementById('UsuNombres').addEventListener('keypress', soloLetras);
+        document.getElementById('UsuApellidos').addEventListener('keypress', soloLetras);
+        document.getElementById('UsuNumero').addEventListener('keypress', soloNumeros);
+    </script>
 @endsection
